@@ -5,9 +5,13 @@ import { corsHeaders } from '../_shared/cors.ts'; // Ensure this path is correct
 // Define the RASA server URL (from your Codespace or future deployment)
 // IMPORTANT: This URL will change if your Codespace restarts or is rebuilt.
 // For a more permanent solution, deploy RASA to a stable URL and update this.
-const RASA_SERVER_URL = "https://miniature-space-spork-x5p6rpjv5wvp367g5-5005.app.github.dev/webhooks/rest/webhook";
+const RASA_BASE_URL = "https://miniature-space-spork-x5p6rpjv5wvp367g5-5005.app.github.dev";
+const RASA_WEBHOOK_PATH = "/webhooks/rest/webhook";
+const RASA_ACCESS_TOKEN = "MySecretRasaToken123"; // The token RASA server will expect
 
-console.log(`FETS AI Proxy configured to call RASA server at: ${RASA_SERVER_URL}`);
+const RASA_SERVER_URL = `${RASA_BASE_URL}${RASA_WEBHOOK_PATH}?token=${RASA_ACCESS_TOKEN}`;
+
+console.log(`FETS AI Proxy configured to call RASA server with token at: ${RASA_BASE_URL}${RASA_WEBHOOK_PATH}?token=REDACTED`);
 
 serve(async (req: Request) => {
   // Handle CORS preflight requests
