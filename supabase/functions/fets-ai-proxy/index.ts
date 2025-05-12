@@ -16,19 +16,33 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Extract the user's message from the request body.
-    // The frontend assistant.js (in its original Supabase-calling state) sends: { message: "user input" }
     let userMessage: string;
     try {
       const body = await req.json();
-      if (!body.message || typeof body.message !== 'string' || body.message.trim() === "") {
-        console.error("Request body missing 'message' string or message is empty:", body);
-        throw new Error("Missing or invalid 'message' string in request body.");
+      // Expecting body.messages to be an array like:
+      // [{ sender: "user" | "ai", text: "..." }, ...]
+      if (!body.messages || !Array.isArray(body.messages) || body.messages.length === 0) {
+        console.error("Request body missing 'messages' array or array is empty:", body);
+        throw new Error("Missing or invalid 'messages' array in request body.");
       }
-      userMessage = body.message.trim();
-      console.log("Received message from client:", userMessage);
+      
+      // Get the last message from the array
+      const lastMessageObject = body.messages[body.messages.length - 1];
+      
+      if (!lastMessageObject || typeof lastMessageObject.text !== 'string' || lastMessageObject.text.trim() === "") {
+        console.error("Last message object is invalid or text is empty:", lastMessageObject);
+        throw new Error("Invalid last message object or text is empty.");
+      }
+      // Optional: you might want to ensure the last message is from 'user'
+      // if (lastMessageObject.sender !== 'user') {
+      //   console.error("Last message is not from user:", lastMessageObject);
+      //   throw new Error("Last message not from user.");
+      // }
+      userMessage = lastMessageObject.text.trim();
+      console.log("Extracted user message from messages array:", userMessage);
+
     } catch (e) {
-      console.error('Error parsing request body or invalid message:', e.message);
+      console.error('Error parsing request body or extracting user message:', e.message);
       return new Response(
         JSON.stringify({ error: `Bad request: ${e.message}` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
